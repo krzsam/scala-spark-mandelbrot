@@ -7,30 +7,34 @@ the solution is not intended to be optimal in case of choice of technologies or 
 
 The calculation of the Mandelbrot Set is done in two steps:
 
-* Input file generation for Spark
-* Calculation of the image data by Spark
+* Input data file generation
+* Iteration process and creation of the image
 
-#### Input File Generation
+#### Input file generation
 
-First, an input file needs to be created with data points for the iteration process. The data has two types of dimensions combined together:
-* data points for iteration process
-* image coordinates
+First, an input data file needs to be created with data points for the iteration process. The data has two types of coordinates combined together within
+one data line:
+* image space coordinates
+* data point coordinates - ***c*** value in the iteration formula
 
-The format is as below. In image coordinates, top left corner is (0,0), and bottom right corner is what was provided as X and Y image sizes respectively
-(see input generation batch below).
-The application currently provides same number of iterations for each data point in the input file - providing number of iterations separately makes the 
-calculation logic simpler and theoretically more flexible if necessary. The input data file is created by ***mandelbrot.Main.generateInputData*** function.
+The format of the one line is as below. In image space coordinates, top left corner is (0,0), and bottom right corner is defined
+by -sx and -sy parameters (horizontal and vertical image sizes respectively) - see *run-spark-k8s-mand-generate.sh* batch below.
+
+The application currently provides the same number of iterations for each data point in the input data file - providing number of iterations for each data point
+separately makes the calculation logic simpler and theoretically more flexible if necessary. 
+
+The input data file is created by ***mandelbrot.Main.generateInputData*** function.
 
 ```
 image-x,image-y,position-x,position-y,number-of-iterations
 ```
 
 Where:
-* image-x : X position of the data point in image coordinates
-* image-y : Y position of the data point in image coordinates
-* position-x : X position of the data point in the data space
-* position-y : Y position of the data point in the data space
-* number-of-iterations : number of iterations for the given data point.
+* *image-x* : X position of the data point in image space
+* *image-y*: Y position of the data point in image space
+* *position-x* : X position of the data point in the data space
+* *position-y* : Y position of the data point in the data space
+* *number-of-iterations* : number of iterations for the given data point.
 
 Batch file to generate the input data file: *run-spark-k8s-mand-generate.sh*
 ```
@@ -58,18 +62,18 @@ $SPARK_HOME/bin/spark-submit
 ```
 
 Application parameters:
-* -h : specifies HDFS URI
-* -c : specifies step, for input file generation the value should be *generate*
-* -f : specifies HDFS location for the input data - please bear in mind that input data file will be in fact a directory as the file will be partitioned 
+* *-h* : specifies HDFS URI
+* *-c* : specifies step, for input file generation the value should be *generate*
+* *-f* : specifies HDFS location for the input data - please bear in mind that input data file will be in fact a directory as the file will be partitioned 
        by Spark and will be physically represented as a directory with files containing partitioned data. 
        Currently the application writes the input file data in Parquet format, but this can be changed to any other supported format.
-* -tl : specifies top-left corner in input data coordinates. Provided as comma separated pair of decimal numbers.
-* -br :  specifies bottom-right corner in input data coordinates. Provided as comma separated pair of decimal numbers.
-* -sx : specifies X image size
-* -sy : specifies Y image size
-* -i : number of iterations each data point will be iterated through
+* *-tl* : specifies top-left corner in input data coordinates. Provided as comma separated pair of decimal numbers.
+* *-br* :  specifies bottom-right corner in input data coordinates. Provided as comma separated pair of decimal numbers.
+* *-sx* : specifies horizontal image size
+* *-sy* : specifies vertical image size
+* *-i* : number of iterations each data point will be iterated through
 
-#### Image data Calculation
+#### Iteration process and creation of the image
 
 Once the input data file is created on HDFS, the generation process reads it line by line and iterates each data point defined by each input line 
 using the Mandelbrot Set formula using batch file *run-spark-k8s-mand-calculate.sh*. The actual calculation 
@@ -104,9 +108,9 @@ $SPARK_HOME/bin/spark-submit
 ```
 
 Application parameters:
-* -h : specifies HDFS URI
-* -c : specifies step, for calculation and image generation the value should be *calculate*
-* -f : specifies HDFS location for the input data file as created in the step above.
+* *-h* : specifies HDFS URI
+* *-c* : specifies step, for calculation and image generation the value should be *calculate*
+* *-f* : specifies HDFS location for the input data file as created in the generation step above.
 
 The calculation step produces a **single** PNG file on HDFS, and the name corresponds to the input data file as below:
 ```
@@ -119,10 +123,10 @@ An example file produced by the calculation is shown below:
 
 ## Application build
 
-The application is build in the same way and uses the same Spark Docker file as created for 
+The application is build in the same way and uses the same Spark Docker image as created for 
 [/github.com/krzsam scala-spark-example](https://github.com/krzsam/scala-spark-example) project.
 
-For details on running Spark on Kubernetes including creating Spark Docker image please refer to 
+For specific details on running Spark on Kubernetes including creating Spark Docker image please refer to 
 [Running application on Spark via Kubernetes](https://github.com/krzsam/scala-spark-example/blob/master/README-spark-k8s.md)
 
 ## Links
