@@ -1,7 +1,7 @@
 # scala-spark-mandelbrot
 
-An example application to calculate a [Mandelbrot Set](https://en.wikipedia.org/wiki/Mandelbrot_set) using Spark. The goal is demonstrate use of Spark to achieve the goal,
-the solution is not intended to be optimal in case of choice of technologies or performance. 
+An example application to calculate a [Mandelbrot Set](https://en.wikipedia.org/wiki/Mandelbrot_set) using Spark. The goal is to demonstrate use of Spark computing framework to perform calculations
+while using Kubernetes as the underlying cluster management platform. The solution is not intended to be optimal in terms of choice of technologies or performance. 
 
 ## Application structure
 
